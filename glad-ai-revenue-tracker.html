@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glad AI Revenue Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --navy: #051956;
+      --deep-blue: #0111A4;
+      --electric: #0419F8;
+      --mid-blue: #2532AD;
+      --royal: #002492;
+      --bg: #01071f;
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.55);
+      --line: rgba(255,255,255,0.12);
+      --glass: rgba(5,25,86,0.78);
+      --glass-2: rgba(1,7,31,0.45);
+      --shadow: 0 24px 80px rgba(1,17,164,0.24);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Montserrat", "Century Gothic", "Myriad Pro", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(4,25,248,0.3), transparent 28%),
+        radial-gradient(circle at 92% 14%, rgba(37,50,173,0.3), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(0,36,146,0.28), transparent 30%),
+        var(--bg);
+      color: var(--white);
+      padding: 28px;
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .hero,
+    .card {
+      border: 1px solid var(--line);
+      background: var(--glass);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 36px;
+      padding: 42px;
+      margin-bottom: 22px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(4,25,248,0.38), transparent 34%),
+        linear-gradient(135deg, rgba(255,255,255,0.08), transparent 28%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      gap: 32px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      font-size: clamp(42px, 7vw, 78px);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      line-height: 0.95;
+    }
+
+    h1 {
+      margin: 24px 0 10px;
+      font-size: clamp(34px, 5vw, 58px);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .target-box {
+      min-width: 300px;
+      border: 1px solid var(--line);
+      background: var(--glass-2);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .target-box label,
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.46);
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 22px 0;
+    }
+
+    .charts {
+      grid-template-columns: 2fr 1fr;
+      margin-bottom: 22px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
+      align-items: end;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+
+    .metric {
+      min-height: 150px;
+    }
+
+    .metric-title {
+      font-size: 11px;
+      letter-spacing: 0.24em;
+      color: rgba(255,255,255,0.46);
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-size: 34px;
+      font-weight: 300;
+      margin: 14px 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(4,25,248,0.38);
+      background: rgba(4,25,248,0.16);
+      color: #b9c7ff;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 44px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(5,25,86,0.72);
+      color: var(--white);
+      outline: none;
+      padding: 0 13px;
+      font: inherit;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.35);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(4,25,248,0.7);
+      box-shadow: 0 0 0 4px rgba(4,25,248,0.18);
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      height: 44px;
+      padding: 0 16px;
+      color: white;
+      background: var(--electric);
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+      box-shadow: 0 16px 32px rgba(4,25,248,0.25);
+      transition: 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: var(--mid-blue);
+    }
+
+    button.secondary {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      box-shadow: none;
+    }
+
+    button.danger {
+      color: white;
+      background: rgba(255,255,255,0.08);
+      box-shadow: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    th {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.48);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    td {
+      color: rgba(255,255,255,0.78);
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .status {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.paid {
+      color: #b9c7ff;
+      border-color: rgba(4,25,248,0.45);
+      background: rgba(4,25,248,0.18);
+    }
+
+    .status.pending {
+      color: #d6dcff;
+      border-color: rgba(37,50,173,0.55);
+      background: rgba(37,50,173,0.22);
+    }
+
+    .status.overdue {
+      color: white;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filters input {
+      width: 290px;
+    }
+
+    canvas {
+      max-height: 320px;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        padding: 16px;
+      }
+
+      .hero {
+        padding: 28px;
+      }
+
+      .metrics,
+      .charts,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .target-box,
+      .filters input {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="hero-content">
+        <div>
+          <div class="eyebrow">AI That Never Sleeps</div>
+          <div class="brand">Glad AI</div>
+          <h1>Revenue Control Room</h1>
+          <p>
+            Track client revenue, AI agents, automations, websites, retainers,
+            pending invoices, and monthly growth inside a branded Glad AI dashboard.
+          </p>
+        </div>
+
+        <div class="target-box">
+          <label for="targetInput">Monthly target</label>
+          <input id="targetInput" type="number" min="0" />
+          <button class="secondary" id="exportBtn">Export CSV</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-label">Glad AI control room</div>
+      <h2>Add Revenue</h2>
+      <form id="revenueForm" class="grid form-grid">
+        <input id="client" placeholder="Client name" required />
+        <input id="service" placeholder="Service / offer" required />
+        <input id="amount" type="number" min="0" step="1" placeholder="Amount" required />
+        <input id="date" type="date" required />
+        <select id="status">
+          <option>Paid</option>
+          <option>Pending</option>
+          <option>Overdue</option>
+        </select>
+        <select id="type">
+          <option>AI Agent</option>
+          <option>Automation</option>
+          <option>Website</option>
+          <option>Retainer</option>
+          <option>Consulting</option>
+          <option>SEO</option>
+        </select>
+        <div class="actions">
+          <button type="submit" id="submitBtn">Add Record</button>
+          <button type="button" class="secondary" id="cancelBtn" style="display:none;">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="grid metrics">
+      <div class="card metric">
+        <div class="metric-title">Paid Revenue</div>
+        <div class="metric-value" id="paidMetric">$0</div>
+        <span class="pill" id="targetMetric">0% of target</span>
+      </div>
+      <div class="card metric">
+        <div class="metric-title">Pending Invoices</div>
+        <div class="metric-value" id="pendingMetric">$0</div>
+        <span class="pill">Needs follow-up</span>
+      </div>
+      <div class="card metric">
+        <div class="metric-title">Overdue Revenue</div>
+        <div class="metric-value" id="overdueMetric">$0</div>
+        <span class="pill">Collect soon</span>
+      </div>
+      <div class="card metric">
+        <div class="metric-title">Average Deal</div>
+        <div class="metric-value" id="averageMetric">$0</div>
+        <span class="pill" id="recordCount">0 records</span>
+      </div>
+    </section>
+
+    <section class="grid charts">
+      <div class="card">
+        <div class="section-label">Growth signal</div>
+        <h2>Paid Revenue vs Target</h2>
+        <p>Only paid revenue is counted toward your target.</p>
+        <canvas id="revenueChart"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Offer mix</div>
+        <h2>Revenue by Type</h2>
+        <p>See which Glad AI services bring in the most revenue.</p>
+        <canvas id="typeChart"></canvas>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <div>
+          <div class="section-label">Client database</div>
+          <h2>Revenue Records</h2>
+          <p>Search, filter, edit, delete, and export your revenue data.</p>
+        </div>
+
+        <div class="filters">
+          <input id="searchInput" placeholder="Search client, service, or type" />
+          <select id="filterStatus">
+            <option>All</option>
+            <option>Paid</option>
+            <option>Pending</option>
+            <option>Overdue</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Service</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Type</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "glad-ai-revenue-tracker-html-v1";
+    const TARGET_STORAGE_KEY = "glad-ai-revenue-target-html-v1";
+
+    const starterRevenue = [
+      { id: "rev-1", client: "Lotus Roots", service: "Webflow redesign", amount: 8400, status: "Paid", type: "Website", date: "2026-07-28" },
+      { id: "rev-2", client: "Blue Bay Rentals", service: "Booking automation", amount: 5200, status: "Pending", type: "Automation", date: "2026-07-25" },
+      { id: "rev-3", client: "Curaçao Dental", service: "AI intake assistant", amount: 3600, status: "Pending", type: "AI Agent", date: "2026-07-19" },
+      { id: "rev-4", client: "Harbor Legal", service: "Website + CRM", amount: 7900, status: "Paid", type: "Website", date: "2026-07-15" },
+      { id: "rev-5", client: "Palm Studio", service: "Monthly AI support retainer", amount: 1800, status: "Paid", type: "Retainer", date: "2026-06-30" }
+    ];
+
+    let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || starterRevenue;
+    let target = Number(localStorage.getItem(TARGET_STORAGE_KEY)) || 25000;
+    let editingId = null;
+    let revenueChart;
+    let typeChart;
+
+    const form = document.getElementById("revenueForm");
+    const targetInput = document.getElementById("targetInput");
+    const table = document.getElementById("recordsTable");
+    const searchInput = document.getElementById("searchInput");
+    const filterStatus = document.getElementById("filterStatus");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const fields = {
+      client: document.getElementById("client"),
+      service: document.getElementById("service"),
+      amount: document.getElementById("amount"),
+      date: document.getElementById("date"),
+      status: document.getElementById("status"),
+      type: document.getElementById("type")
+    };
+
+    fields.date.value = new Date().toISOString().slice(0, 10);
+    targetInput.value = target;
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(Number(value || 0));
+    }
+
+    function readableDate(dateString) {
+      return new Date(dateString + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function monthLabel(dateString) {
+      return new Date(dateString + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short"
+      });
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      localStorage.setItem(TARGET_STORAGE_KEY, String(target));
+    }
+
+    function getFilteredRecords() {
+      const q = searchInput.value.toLowerCase();
+      const status = filterStatus.value;
+
+      return records
+        .filter(record => {
+          const searchText = `${record.client} ${record.service} ${record.type}`.toLowerCase();
+          const matchesSearch = searchText.includes(q);
+          const matchesStatus = status === "All" || record.status === status;
+          return matchesSearch && matchesStatus;
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    function getTotals(filtered) {
+      const paid = filtered.filter(r => r.status === "Paid").reduce((sum, r) => sum + Number(r.amount), 0);
+      const pending = filtered.filter(r => r.status === "Pending").reduce((sum, r) => sum + Number(r.amount), 0);
+      const overdue = filtered.filter(r => r.status === "Overdue").reduce((sum, r) => sum + Number(r.amount), 0);
+      const total = paid + pending + overdue;
+      const average = filtered.length ? Math.round(total / filtered.length) : 0;
+      return { paid, pending, overdue, average };
+    }
+
+    function renderMetrics(filtered) {
+      const totals = getTotals(filtered);
+      const progress = target > 0 ? Math.round((totals.paid / target) * 100) : 0;
+
+      document.getElementById("paidMetric").textContent = formatCurrency(totals.paid);
+      document.getElementById("pendingMetric").textContent = formatCurrency(totals.pending);
+      document.getElementById("overdueMetric").textContent = formatCurrency(totals.overdue);
+      document.getElementById("averageMetric").textContent = formatCurrency(totals.average);
+      document.getElementById("targetMetric").textContent = `${progress}% of target`;
+      document.getElementById("recordCount").textContent = `${filtered.length} records`;
+    }
+
+    function renderTable(filtered) {
+      table.innerHTML = filtered.map(record => `
+        <tr>
+          <td>${record.client}</td>
+          <td>${record.service}</td>
+          <td><strong>${formatCurrency(record.amount)}</strong></td>
+          <td><span class="status ${record.status.toLowerCase()}">${record.status}</span></td>
+          <td>${record.type}</td>
+          <td>${readableDate(record.date)}</td>
+          <td>
+            <div class="actions">
+              <button class="secondary" onclick="editRecord('${record.id}')">Edit</button>
+              <button class="danger" onclick="deleteRecord('${record.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderCharts(filtered) {
+      const monthlyMap = {};
+      records.forEach(record => {
+        const key = record.date.slice(0, 7);
+        if (!monthlyMap[key]) monthlyMap[key] = { label: monthLabel(record.date), revenue: 0, target };
+        if (record.status === "Paid") monthlyMap[key].revenue += Number(record.amount);
+      });
+
+      const monthly = Object.entries(monthlyMap)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([, value]) => value);
+
+      const typeMap = {};
+      filtered.forEach(record => {
+        typeMap[record.type] = (typeMap[record.type] || 0) + Number(record.amount);
+      });
+
+      const typeLabels = Object.keys(typeMap);
+      const typeValues = Object.values(typeMap);
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: "rgba(255,255,255,0.7)" } },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: ${formatCurrency(context.raw)}`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: "rgba(255,255,255,0.5)" }, grid: { color: "rgba(255,255,255,0.08)" } },
+          y: { ticks: { color: "rgba(255,255,255,0.5)" }, grid: { color: "rgba(255,255,255,0.08)" } }
+        }
+      };
+
+      if (revenueChart) revenueChart.destroy();
+      revenueChart = new Chart(document.getElementById("revenueChart"), {
+        type: "line",
+        data: {
+          labels: monthly.map(item => item.label),
+          datasets: [
+            {
+              label: "Paid Revenue",
+              data: monthly.map(item => item.revenue),
+              borderColor: "#0419F8",
+              backgroundColor: "rgba(4,25,248,0.22)",
+              fill: true,
+              tension: 0.38
+            },
+            {
+              label: "Target",
+              data: monthly.map(item => item.target),
+              borderColor: "#8ea7ff",
+              borderDash: [6, 6],
+              backgroundColor: "transparent",
+              tension: 0.38
+            }
+          ]
+        },
+        options: chartOptions
+      });
+
+      if (typeChart) typeChart.destroy();
+      typeChart = new Chart(document.getElementById("typeChart"), {
+        type: "bar",
+        data: {
+          labels: typeLabels,
+          datasets: [{
+            label: "Revenue",
+            data: typeValues,
+            backgroundColor: "#0419F8",
+            borderRadius: 12
+          }]
+        },
+        options: chartOptions
+      });
+    }
+
+    function render() {
+      const filtered = getFilteredRecords();
+      renderMetrics(filtered);
+      renderTable(filtered);
+      renderCharts(filtered);
+      save();
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const record = {
+        id: editingId || crypto.randomUUID(),
+        client: fields.client.value,
+        service: fields.service.value,
+        amount: Number(fields.amount.value),
+        status: fields.status.value,
+        type: fields.type.value,
+        date: fields.date.value
+      };
+
+      if (editingId) {
+        records = records.map(item => item.id === editingId ? record : item);
+      } else {
+        records = [record, ...records];
+      }
+
+      editingId = null;
+      submitBtn.textContent = "Add Record";
+      cancelBtn.style.display = "none";
+      form.reset();
+      fields.date.value = new Date().toISOString().slice(0, 10);
+      fields.status.value = "Paid";
+      fields.type.value = "AI Agent";
+      render();
+    });
+
+    window.editRecord = function(id) {
+      const record = records.find(item => item.id === id);
+      if (!record) return;
+
+      editingId = id;
+      fields.client.value = record.client;
+      fields.service.value = record.service;
+      fields.amount.value = record.amount;
+      fields.status.value = record.status;
+      fields.type.value = record.type;
+      fields.date.value = record.date;
+      submitBtn.textContent = "Save Changes";
+      cancelBtn.style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.deleteRecord = function(id) {
+      records = records.filter(item => item.id !== id);
+      render();
+    };
+
+    cancelBtn.addEventListener("click", () => {
+      editingId = null;
+      submitBtn.textContent = "Add Record";
+      cancelBtn.style.display = "none";
+      form.reset();
+      fields.date.value = new Date().toISOString().slice(0, 10);
+      fields.status.value = "Paid";
+      fields.type.value = "AI Agent";
+    });
+
+    searchInput.addEventListener("input", render);
+    filterStatus.addEventListener("change", render);
+
+    targetInput.addEventListener("input", () => {
+      target = Number(targetInput.value);
+      render();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const headers = ["Client", "Service", "Amount", "Status", "Type", "Date"];
+      const csvRows = records.map(row =>
+        [row.client, row.service, row.amount, row.status, row.type, row.date]
+          .map(value => `"${String(value).replaceAll('"', '""')}"`)
+          .join(",")
+      );
+      const csv = [headers.join(","), ...csvRows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "glad-ai-revenue-tracker.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
+  </script>
+</body>
+</html>
