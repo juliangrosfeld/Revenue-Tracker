@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glad AI Revenue & CRM Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --navy: #051956;
+      --deep-blue: #0111A4;
+      --electric: #0419F8;
+      --mid-blue: #2532AD;
+      --royal: #002492;
+      --bg: #01071f;
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.55);
+      --line: rgba(255,255,255,0.12);
+      --glass: rgba(5,25,86,0.78);
+      --glass-2: rgba(1,7,31,0.45);
+      --shadow: 0 24px 80px rgba(1,17,164,0.24);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Montserrat", "Century Gothic", "Myriad Pro", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(4,25,248,0.3), transparent 28%),
+        radial-gradient(circle at 92% 14%, rgba(37,50,173,0.3), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(0,36,146,0.28), transparent 30%),
+        var(--bg);
+      color: var(--white);
+      padding: 28px;
+    }
+
+    .app { max-width: 1440px; margin: 0 auto; }
+
+    .hero, .card {
+      border: 1px solid var(--line);
+      background: var(--glass);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 36px;
+      padding: 42px;
+      margin-bottom: 22px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(4,25,248,0.38), transparent 34%),
+        linear-gradient(135deg, rgba(255,255,255,0.08), transparent 28%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      gap: 32px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      font-size: clamp(42px, 7vw, 78px);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      line-height: 0.95;
+    }
+
+    h1 {
+      margin: 24px 0 10px;
+      font-size: clamp(34px, 5vw, 58px);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin: 8px 0 8px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+    }
+
+    p { color: var(--muted); line-height: 1.7; margin: 0; }
+
+    .target-box {
+      min-width: 320px;
+      border: 1px solid var(--line);
+      background: var(--glass-2);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-label,
+    .target-box label {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.46);
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      box-shadow: none;
+    }
+
+    .tab.active {
+      background: var(--electric);
+      border-color: var(--electric);
+      box-shadow: 0 16px 32px rgba(4,25,248,0.25);
+    }
+
+    .grid { display: grid; gap: 18px; }
+    .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 22px 0; }
+    .charts { grid-template-columns: 2fr 1fr; margin-bottom: 22px; }
+    .revenue-form { grid-template-columns: 1fr 2fr 1fr 1fr 1fr; align-items: end; }
+    .crm-form { grid-template-columns: repeat(5, 1fr); align-items: end; }
+
+    .card { border-radius: var(--radius); padding: 22px; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .metric { min-height: 150px; }
+
+    .metric-title {
+      font-size: 11px;
+      letter-spacing: 0.24em;
+      color: rgba(255,255,255,0.46);
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-size: 34px;
+      font-weight: 300;
+      margin: 14px 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(4,25,248,0.38);
+      background: rgba(4,25,248,0.16);
+      color: #b9c7ff;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(5,25,86,0.72);
+      color: var(--white);
+      outline: none;
+      padding: 0 13px;
+      font: inherit;
+    }
+
+    input, select { height: 44px; }
+    textarea { min-height: 92px; padding: 12px 13px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.35); }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(4,25,248,0.7);
+      box-shadow: 0 0 0 4px rgba(4,25,248,0.18);
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      height: 44px;
+      padding: 0 16px;
+      color: white;
+      background: var(--electric);
+      cursor: pointer;
+      font-weight: 700;
+      font-family: inherit;
+      box-shadow: 0 16px 32px rgba(4,25,248,0.25);
+      transition: 0.18s ease;
+    }
+
+    button:hover { transform: translateY(-1px); background: var(--mid-blue); }
+    button.secondary { border: 1px solid var(--line); background: rgba(255,255,255,0.06); box-shadow: none; }
+    button.danger { color: white; background: rgba(255,255,255,0.08); box-shadow: none; }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .wide-2 { grid-column: span 2; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 24px; }
+
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+    th, td {
+      text-align: left;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.48);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    td { color: rgba(255,255,255,0.78); }
+    tr:hover td { background: rgba(255,255,255,0.04); }
+
+    .status, .stage {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.paid, .stage.won {
+      color: #b9c7ff;
+      border-color: rgba(4,25,248,0.45);
+      background: rgba(4,25,248,0.18);
+    }
+
+    .status.pending, .stage.proposal, .stage.qualified {
+      color: #d6dcff;
+      border-color: rgba(37,50,173,0.55);
+      background: rgba(37,50,173,0.22);
+    }
+
+    .status.overdue, .stage.lost, .stage.new {
+      color: white;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .stage.contacted {
+      color: #b9c7ff;
+      border-color: rgba(126,160,255,0.45);
+      background: rgba(126,160,255,0.13);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; }
+    .filters input { width: 290px; }
+
+    canvas { max-height: 320px; }
+
+    .small-note {
+      display: block;
+      max-width: 260px;
+      color: rgba(255,255,255,0.48);
+      white-space: normal;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    .pipeline-board {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(240px, 1fr));
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .pipeline-column {
+      min-height: 420px;
+      border: 1px solid var(--line);
+      background: rgba(1,7,31,0.35);
+      border-radius: 24px;
+      padding: 14px;
+      transition: 0.18s ease;
+    }
+
+    .pipeline-column.drag-over {
+      border-color: rgba(4,25,248,0.85);
+      background: rgba(4,25,248,0.16);
+      box-shadow: inset 0 0 0 1px rgba(4,25,248,0.25);
+    }
+
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .column-title {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.68);
+      font-weight: 800;
+    }
+
+    .column-total {
+      color: #b9c7ff;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .column-count {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: rgba(255,255,255,0.62);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .deal-card {
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, rgba(4,25,248,0.18), transparent 32%),
+        rgba(5,25,86,0.78);
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: grab;
+      transition: 0.18s ease;
+    }
+
+    .deal-card:active { cursor: grabbing; }
+    .deal-card:hover { transform: translateY(-2px); border-color: rgba(4,25,248,0.45); }
+    .deal-card.dragging { opacity: 0.45; transform: scale(0.98); }
+
+    .deal-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .deal-company {
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.35;
+    }
+
+    .deal-value {
+      color: #b9c7ff;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .deal-meta {
+      margin-top: 10px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .followup-due { color: #fff; font-weight: 800; }
+    .followup-soon { color: #b9c7ff; font-weight: 800; }
+
+    .deal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .deal-actions button {
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .metrics, .charts, .revenue-form, .crm-form { grid-template-columns: 1fr; }
+      .wide-2 { grid-column: auto; }
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 16px; }
+      .hero { padding: 28px; }
+      .target-box, .filters input { width: 100%; min-width: unset; }
+      .pipeline-board { grid-template-columns: repeat(6, 260px); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="hero-content">
+        <div>
+          <div class="eyebrow">AI That Never Sleeps</div>
+          <div class="brand">Glad AI</div>
+          <h1>Revenue & CRM Control Room</h1>
+          <p>
+            Track revenue, clients, deals, follow-ups, sales pipeline stages,
+            and monthly growth inside a branded Glad AI dashboard.
+          </p>
+        </div>
+
+        <div class="target-box">
+          <label for="targetInput">Monthly revenue target</label>
+          <input id="targetInput" type="number" min="0" />
+          <button class="secondary" id="exportRevenueBtn">Export Revenue CSV</button>
+          <button class="secondary" id="exportCrmBtn">Export CRM CSV</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="revenueView">Revenue Tracker</button>
+      <button class="tab" data-tab="crmView">CRM Pipeline</button>
+    </nav>
+
+    <section id="revenueView" class="view active">
+      <section class="card">
+        <div class="section-label">Revenue entry</div>
+        <h2>Add Revenue</h2>
+        <form id="revenueForm" class="grid revenue-form">
+          <input id="client" placeholder="Client name" required />
+          <input id="service" placeholder="Service / offer" required />
+          <input id="amount" type="number" min="0" step="1" placeholder="Amount" required />
+          <input id="date" type="date" required />
+          <select id="status">
+            <option>Paid</option>
+            <option>Pending</option>
+            <option>Overdue</option>
+          </select>
+          <select id="type">
+            <option>AI Agent</option>
+            <option>Automation</option>
+            <option>Website</option>
+            <option>Retainer</option>
+            <option>Consulting</option>
+            <option>SEO</option>
+          </select>
+          <div class="actions">
+            <button type="submit" id="submitBtn">Add Record</button>
+            <button type="button" class="secondary" id="cancelBtn" style="display:none;">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="grid metrics">
+        <div class="card metric">
+          <div class="metric-title">Paid Revenue</div>
+          <div class="metric-value" id="paidMetric">$0</div>
+          <span class="pill" id="targetMetric">0% of target</span>
+        </div>
+        <div class="card metric">
+          <div class="metric-title">Pending Invoices</div>
+          <div class="metric-value" id="pendingMetric">$0</div>
+          <span class="pill">Needs follow-up</span>
+        </div>
+        <div class="card metric">
+          <div class="metric-title">Overdue Revenue</div>
+          <div class="metric-value" id="overdueMetric">$0</div>
+          <span class="pill">Collect soon</span>
+        </div>
+        <div class="card metric">
+          <div class="metric-title">Average Deal</div>
+          <div class="metric-value" id="averageMetric">$0</div>
+          <span class="pill" id="recordCount">0 records</span>
+        </div>
+      </section>
+
+      <section class="grid charts">
+        <div class="card">
+          <div class="section-label">Growth signal</div>
+          <h2>Paid Revenue vs Target</h2>
+          <p>Only paid revenue is counted toward your target.</p>
+          <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Offer mix</div>
+          <h2>Revenue by Type</h2>
+          <p>See which Glad AI services bring in the most revenue.</p>
+          <canvas id="typeChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="toolbar">
+          <div>
+            <div class="section-label">Revenue database</div>
+            <h2>Revenue Records</h2>
+            <p>Search, filter, edit, delete, and export your revenue data.</p>
+          </div>
+
+          <div class="filters">
+            <input id="searchInput" placeholder="Search client, service, or type" />
+            <select id="filterStatus">
+              <option>All</option>
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Overdue</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section id="crmView" class="view">
+      <section class="card">
+        <div class="section-label">Sales pipeline</div>
+        <h2>Add / Edit CRM Deal</h2>
+        <form id="crmForm" class="grid crm-form">
+          <input id="crmCompany" placeholder="Company / lead name" required />
+          <input id="crmContact" placeholder="Contact person" />
+          <input id="crmEmail" type="email" placeholder="Email" />
+          <input id="crmPhone" placeholder="Phone / WhatsApp" />
+          <select id="crmStage">
+            <option>New</option>
+            <option>Contacted</option>
+            <option>Qualified</option>
+            <option>Proposal</option>
+            <option>Won</option>
+            <option>Lost</option>
+          </select>
+
+          <input id="crmValue" type="number" min="0" step="1" placeholder="Deal value" />
+          <input id="crmProbability" type="number" min="0" max="100" step="1" placeholder="Probability %" />
+          <input id="crmLastFollowUp" type="date" />
+          <input id="crmNextFollowUp" type="date" />
+          <select id="crmSource">
+            <option>Cold Call</option>
+            <option>Referral</option>
+            <option>Website</option>
+            <option>Instagram</option>
+            <option>LinkedIn</option>
+            <option>Email</option>
+            <option>Other</option>
+          </select>
+
+          <input id="crmService" class="wide-2" placeholder="Interested service, e.g. AI Agent, Website, Automation" />
+          <textarea id="crmNotes" class="wide-2" placeholder="Notes from last conversation, objections, next steps..."></textarea>
+          <div class="actions">
+            <button type="submit" id="crmSubmitBtn">Add Deal</button>
+            <button type="button" class="secondary" id="crmCancelBtn" style="display:none;">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="grid metrics">
+        <div class="card metric">
+          <div class="metric-title">Open Pipeline</div>
+          <div class="metric-value" id="openPipelineMetric">$0</div>
+          <span class="pill">Active deals</span>
+        </div>
+        <div class="card metric">
+          <div class="metric-title">Weighted Pipeline</div>
+          <div class="metric-value" id="weightedPipelineMetric">$0</div>
+          <span class="pill">Value x probability</span>
+        </div>
+        <div class="card metric">
+          <div class="metric-title">Follow-ups Due</div>
+          <div class="metric-value" id="followupsDueMetric">0</div>
+          <span class="pill">Today or overdue</span>
+        </div>
+        <div class="card metric">
+          <div class="metric-title">Won Deals</div>
+          <div class="metric-value" id="wonDealsMetric">0</div>
+          <span class="pill">Closed clients</span>
+        </div>
+      </section>
+
+      <section class="grid charts">
+        <div class="card">
+          <div class="section-label">Pipeline value</div>
+          <h2>Deal Value by Stage</h2>
+          <p>See where future revenue is sitting in your sales process.</p>
+          <canvas id="pipelineChart"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Lead source</div>
+          <h2>Deals by Source</h2>
+          <p>Track where your best opportunities come from.</p>
+          <canvas id="sourceChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="toolbar">
+          <div>
+            <div class="section-label">Drag & drop board</div>
+            <h2>Sales Pipeline Board</h2>
+            <p>Drag deals between stages. The stage saves automatically after you drop the card.</p>
+          </div>
+
+          <div class="filters">
+            <input id="crmSearchInput" placeholder="Search company, contact, service, notes" />
+            <select id="crmFilterStage">
+              <option>All</option>
+              <option>New</option>
+              <option>Contacted</option>
+              <option>Qualified</option>
+              <option>Proposal</option>
+              <option>Won</option>
+              <option>Lost</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="pipelineBoard" class="pipeline-board"></div>
+      </section>
+
+      <section class="card">
+        <div class="toolbar">
+          <div>
+            <div class="section-label">CRM table</div>
+            <h2>Pipeline Records</h2>
+            <p>Detailed table view for all CRM deals.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Stage</th>
+                <th>Value</th>
+                <th>Probability</th>
+                <th>Last Follow-up</th>
+                <th>Next Follow-up</th>
+                <th>Source</th>
+                <th>Service / Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="crmTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const REVENUE_STORAGE_KEY = "glad-ai-revenue-tracker-html-v3";
+    const CRM_STORAGE_KEY = "glad-ai-crm-tracker-html-v2";
+    const TARGET_STORAGE_KEY = "glad-ai-revenue-target-html-v3";
+    const STAGES = ["New", "Contacted", "Qualified", "Proposal", "Won", "Lost"];
+
+    const starterRevenue = [
+      { id: "rev-1", client: "Lotus Roots", service: "Webflow redesign", amount: 8400, status: "Paid", type: "Website", date: "2026-07-28" },
+      { id: "rev-2", client: "Blue Bay Rentals", service: "Booking automation", amount: 5200, status: "Pending", type: "Automation", date: "2026-07-25" },
+      { id: "rev-3", client: "Curaçao Dental", service: "AI intake assistant", amount: 3600, status: "Pending", type: "AI Agent", date: "2026-07-19" },
+      { id: "rev-4", client: "Harbor Legal", service: "Website + CRM", amount: 7900, status: "Paid", type: "Website", date: "2026-07-15" },
+      { id: "rev-5", client: "Palm Studio", service: "Monthly AI support retainer", amount: 1800, status: "Paid", type: "Retainer", date: "2026-06-30" }
+    ];
+
+    const starterCrm = [
+      { id: "crm-1", company: "Mambo Beach Villas", contact: "Sofia", email: "sofia@example.com", phone: "+5999 000 0000", stage: "Proposal", value: 6500, probability: 65, lastFollowUp: "2026-07-24", nextFollowUp: "2026-07-31", source: "Referral", service: "AI booking assistant", notes: "Interested in reducing manual booking questions." },
+      { id: "crm-2", company: "Island Roofers", contact: "Mark", email: "mark@example.com", phone: "+5999 111 1111", stage: "Qualified", value: 4200, probability: 45, lastFollowUp: "2026-07-22", nextFollowUp: "2026-07-29", source: "Cold Call", service: "Lead qualification agent", notes: "Needs follow-up about Google Ads lead handling." },
+      { id: "crm-3", company: "Klinik Medi", contact: "Laura", email: "laura@example.com", phone: "+5999 222 2222", stage: "Contacted", value: 3500, probability: 30, lastFollowUp: "2026-07-20", nextFollowUp: "2026-07-27", source: "Website", service: "Website + AI intake", notes: "Asked for examples from healthcare." },
+      { id: "crm-4", company: "De Graaf Real Estate", contact: "Thomas", email: "thomas@example.com", phone: "+5999 333 3333", stage: "New", value: 2800, probability: 20, lastFollowUp: "", nextFollowUp: "2026-08-01", source: "LinkedIn", service: "CRM automation", notes: "New lead. Needs first call." }
+    ];
+
+    let records = JSON.parse(localStorage.getItem(REVENUE_STORAGE_KEY)) || starterRevenue;
+    let crmDeals = JSON.parse(localStorage.getItem(CRM_STORAGE_KEY)) || starterCrm;
+    let target = Number(localStorage.getItem(TARGET_STORAGE_KEY)) || 25000;
+    let editingId = null;
+    let crmEditingId = null;
+    let draggedDealId = null;
+
+    let revenueChart, typeChart, pipelineChart, sourceChart;
+
+    const targetInput = document.getElementById("targetInput");
+    targetInput.value = target;
+
+    const form = document.getElementById("revenueForm");
+    const table = document.getElementById("recordsTable");
+    const searchInput = document.getElementById("searchInput");
+    const filterStatus = document.getElementById("filterStatus");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const fields = {
+      client: document.getElementById("client"),
+      service: document.getElementById("service"),
+      amount: document.getElementById("amount"),
+      date: document.getElementById("date"),
+      status: document.getElementById("status"),
+      type: document.getElementById("type")
+    };
+
+    const crmForm = document.getElementById("crmForm");
+    const crmTable = document.getElementById("crmTable");
+    const pipelineBoard = document.getElementById("pipelineBoard");
+    const crmSearchInput = document.getElementById("crmSearchInput");
+    const crmFilterStage = document.getElementById("crmFilterStage");
+    const crmCancelBtn = document.getElementById("crmCancelBtn");
+    const crmSubmitBtn = document.getElementById("crmSubmitBtn");
+
+    const crmFields = {
+      company: document.getElementById("crmCompany"),
+      contact: document.getElementById("crmContact"),
+      email: document.getElementById("crmEmail"),
+      phone: document.getElementById("crmPhone"),
+      stage: document.getElementById("crmStage"),
+      value: document.getElementById("crmValue"),
+      probability: document.getElementById("crmProbability"),
+      lastFollowUp: document.getElementById("crmLastFollowUp"),
+      nextFollowUp: document.getElementById("crmNextFollowUp"),
+      source: document.getElementById("crmSource"),
+      service: document.getElementById("crmService"),
+      notes: document.getElementById("crmNotes")
+    };
+
+    fields.date.value = new Date().toISOString().slice(0, 10);
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(Number(value || 0));
+    }
+
+    function readableDate(dateString) {
+      if (!dateString) return "-";
+      return new Date(dateString + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function monthLabel(dateString) {
+      return new Date(dateString + "T00:00:00").toLocaleDateString("en-US", { month: "short" });
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function save() {
+      localStorage.setItem(REVENUE_STORAGE_KEY, JSON.stringify(records));
+      localStorage.setItem(CRM_STORAGE_KEY, JSON.stringify(crmDeals));
+      localStorage.setItem(TARGET_STORAGE_KEY, String(target));
+    }
+
+    function getFilteredRecords() {
+      const q = searchInput.value.toLowerCase();
+      const status = filterStatus.value;
+      return records
+        .filter(record => {
+          const searchText = `${record.client} ${record.service} ${record.type}`.toLowerCase();
+          return searchText.includes(q) && (status === "All" || record.status === status);
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    function getFilteredCrmDeals(ignoreStageFilter = false) {
+      const q = crmSearchInput.value.toLowerCase();
+      const stage = crmFilterStage.value;
+      return crmDeals
+        .filter(deal => {
+          const searchText = `${deal.company} ${deal.contact} ${deal.email} ${deal.phone} ${deal.service} ${deal.notes} ${deal.source}`.toLowerCase();
+          return searchText.includes(q) && (ignoreStageFilter || stage === "All" || deal.stage === stage);
+        })
+        .sort((a, b) => {
+          const aDate = a.nextFollowUp || "9999-12-31";
+          const bDate = b.nextFollowUp || "9999-12-31";
+          return aDate.localeCompare(bDate);
+        });
+    }
+
+    function getRevenueTotals(filtered) {
+      const paid = filtered.filter(r => r.status === "Paid").reduce((sum, r) => sum + Number(r.amount), 0);
+      const pending = filtered.filter(r => r.status === "Pending").reduce((sum, r) => sum + Number(r.amount), 0);
+      const overdue = filtered.filter(r => r.status === "Overdue").reduce((sum, r) => sum + Number(r.amount), 0);
+      const total = paid + pending + overdue;
+      const average = filtered.length ? Math.round(total / filtered.length) : 0;
+      return { paid, pending, overdue, average };
+    }
+
+    function renderRevenueMetrics(filtered) {
+      const totals = getRevenueTotals(filtered);
+      const progress = target > 0 ? Math.round((totals.paid / target) * 100) : 0;
+
+      document.getElementById("paidMetric").textContent = formatCurrency(totals.paid);
+      document.getElementById("pendingMetric").textContent = formatCurrency(totals.pending);
+      document.getElementById("overdueMetric").textContent = formatCurrency(totals.overdue);
+      document.getElementById("averageMetric").textContent = formatCurrency(totals.average);
+      document.getElementById("targetMetric").textContent = `${progress}% of target`;
+      document.getElementById("recordCount").textContent = `${filtered.length} records`;
+    }
+
+    function renderRevenueTable(filtered) {
+      table.innerHTML = filtered.map(record => `
+        <tr>
+          <td>${escapeHtml(record.client)}</td>
+          <td>${escapeHtml(record.service)}</td>
+          <td><strong>${formatCurrency(record.amount)}</strong></td>
+          <td><span class="status ${record.status.toLowerCase()}">${record.status}</span></td>
+          <td>${escapeHtml(record.type)}</td>
+          <td>${readableDate(record.date)}</td>
+          <td>
+            <div class="actions">
+              <button class="secondary" onclick="editRecord('${record.id}')">Edit</button>
+              <button class="danger" onclick="deleteRecord('${record.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function getCrmTotals(filtered) {
+      const openDeals = filtered.filter(d => !["Won", "Lost"].includes(d.stage));
+      const openPipeline = openDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
+      const weightedPipeline = openDeals.reduce((sum, d) => sum + (Number(d.value || 0) * Number(d.probability || 0) / 100), 0);
+      const today = new Date().toISOString().slice(0, 10);
+      const followupsDue = openDeals.filter(d => d.nextFollowUp && d.nextFollowUp <= today).length;
+      const wonDeals = filtered.filter(d => d.stage === "Won").length;
+      return { openPipeline, weightedPipeline, followupsDue, wonDeals };
+    }
+
+    function renderCrmMetrics(filtered) {
+      const totals = getCrmTotals(filtered);
+      document.getElementById("openPipelineMetric").textContent = formatCurrency(totals.openPipeline);
+      document.getElementById("weightedPipelineMetric").textContent = formatCurrency(totals.weightedPipeline);
+      document.getElementById("followupsDueMetric").textContent = totals.followupsDue;
+      document.getElementById("wonDealsMetric").textContent = totals.wonDeals;
+    }
+
+    function followUpClass(dateString) {
+      if (!dateString) return "";
+      const today = new Date().toISOString().slice(0, 10);
+      const soon = new Date();
+      soon.setDate(soon.getDate() + 3);
+      const soonString = soon.toISOString().slice(0, 10);
+      if (dateString <= today) return "followup-due";
+      if (dateString <= soonString) return "followup-soon";
+      return "";
+    }
+
+    function renderPipelineBoard(filtered) {
+      const stageFilter = crmFilterStage.value;
+      const visibleStages = stageFilter === "All" ? STAGES : [stageFilter];
+
+      pipelineBoard.innerHTML = visibleStages.map(stage => {
+        const stageDeals = filtered.filter(deal => deal.stage === stage);
+        const total = stageDeals.reduce((sum, deal) => sum + Number(deal.value || 0), 0);
+
+        return `
+          <div class="pipeline-column" data-stage="${stage}">
+            <div class="column-header">
+              <div>
+                <div class="column-title">${stage}</div>
+                <div class="column-total">${formatCurrency(total)}</div>
+              </div>
+              <div class="column-count">${stageDeals.length}</div>
+            </div>
+            <div class="column-cards">
+              ${stageDeals.map(deal => `
+                <article class="deal-card" draggable="true" data-id="${deal.id}">
+                  <div class="deal-top">
+                    <div class="deal-company">${escapeHtml(deal.company)}</div>
+                    <div class="deal-value">${formatCurrency(deal.value)}</div>
+                  </div>
+                  <div class="deal-meta">
+                    ${escapeHtml(deal.contact || "No contact")} · ${Number(deal.probability || 0)}% probability<br>
+                    Source: ${escapeHtml(deal.source || "-")}<br>
+                    Last: ${readableDate(deal.lastFollowUp)}<br>
+                    Next: <span class="${followUpClass(deal.nextFollowUp)}">${readableDate(deal.nextFollowUp)}</span>
+                    <span class="small-note">${escapeHtml(deal.service || "")}</span>
+                    <span class="small-note">${escapeHtml(deal.notes || "")}</span>
+                  </div>
+                  <div class="deal-actions">
+                    <button class="secondary" onclick="editCrmDeal('${deal.id}')">Edit</button>
+                    <button class="secondary" onclick="markCrmWon('${deal.id}')">Won</button>
+                    <button class="danger" onclick="deleteCrmDeal('${deal.id}')">Delete</button>
+                  </div>
+                </article>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      attachDragEvents();
+    }
+
+    function attachDragEvents() {
+      document.querySelectorAll(".deal-card").forEach(card => {
+        card.addEventListener("dragstart", event => {
+          draggedDealId = card.dataset.id;
+          card.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", draggedDealId);
+        });
+
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+          draggedDealId = null;
+          document.querySelectorAll(".pipeline-column").forEach(column => column.classList.remove("drag-over"));
+        });
+      });
+
+      document.querySelectorAll(".pipeline-column").forEach(column => {
+        column.addEventListener("dragover", event => {
+          event.preventDefault();
+          column.classList.add("drag-over");
+        });
+
+        column.addEventListener("dragleave", () => {
+          column.classList.remove("drag-over");
+        });
+
+        column.addEventListener("drop", event => {
+          event.preventDefault();
+          const dealId = event.dataTransfer.getData("text/plain") || draggedDealId;
+          const newStage = column.dataset.stage;
+
+          crmDeals = crmDeals.map(deal => {
+            if (deal.id !== dealId) return deal;
+            const probabilityByStage = {
+              New: 10,
+              Contacted: 25,
+              Qualified: 45,
+              Proposal: 70,
+              Won: 100,
+              Lost: 0
+            };
+            return {
+              ...deal,
+              stage: newStage,
+              probability: probabilityByStage[newStage] ?? deal.probability
+            };
+          });
+
+          column.classList.remove("drag-over");
+          render();
+        });
+      });
+    }
+
+    function renderCrmTable(filtered) {
+      crmTable.innerHTML = filtered.map(deal => {
+        const stageClass = deal.stage.toLowerCase();
+        return `
+          <tr>
+            <td>${escapeHtml(deal.company)}</td>
+            <td>
+              ${escapeHtml(deal.contact || "-")}
+              <span class="small-note">${escapeHtml(deal.email || "")}${deal.email && deal.phone ? " · " : ""}${escapeHtml(deal.phone || "")}</span>
+            </td>
+            <td><span class="stage ${stageClass}">${deal.stage}</span></td>
+            <td><strong>${formatCurrency(deal.value)}</strong></td>
+            <td>${Number(deal.probability || 0)}%</td>
+            <td>${readableDate(deal.lastFollowUp)}</td>
+            <td class="${followUpClass(deal.nextFollowUp)}">${readableDate(deal.nextFollowUp)}</td>
+            <td>${escapeHtml(deal.source)}</td>
+            <td>
+              ${escapeHtml(deal.service || "-")}
+              <span class="small-note">${escapeHtml(deal.notes || "")}</span>
+            </td>
+            <td>
+              <div class="actions">
+                <button class="secondary" onclick="editCrmDeal('${deal.id}')">Edit</button>
+                <button class="secondary" onclick="markCrmWon('${deal.id}')">Won</button>
+                <button class="danger" onclick="deleteCrmDeal('${deal.id}')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function baseChartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: "rgba(255,255,255,0.7)" } },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: ${formatCurrency(context.raw)}`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: "rgba(255,255,255,0.5)" }, grid: { color: "rgba(255,255,255,0.08)" } },
+          y: { ticks: { color: "rgba(255,255,255,0.5)" }, grid: { color: "rgba(255,255,255,0.08)" } }
+        }
+      };
+    }
+
+    function renderRevenueCharts(filtered) {
+      const monthlyMap = {};
+      records.forEach(record => {
+        const key = record.date.slice(0, 7);
+        if (!monthlyMap[key]) monthlyMap[key] = { label: monthLabel(record.date), revenue: 0, target };
+        if (record.status === "Paid") monthlyMap[key].revenue += Number(record.amount);
+      });
+
+      const monthly = Object.entries(monthlyMap).sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
+
+      const typeMap = {};
+      filtered.forEach(record => {
+        typeMap[record.type] = (typeMap[record.type] || 0) + Number(record.amount);
+      });
+
+      if (revenueChart) revenueChart.destroy();
+      revenueChart = new Chart(document.getElementById("revenueChart"), {
+        type: "line",
+        data: {
+          labels: monthly.map(item => item.label),
+          datasets: [
+            { label: "Paid Revenue", data: monthly.map(item => item.revenue), borderColor: "#0419F8", backgroundColor: "rgba(4,25,248,0.22)", fill: true, tension: 0.38 },
+            { label: "Target", data: monthly.map(item => item.target), borderColor: "#8ea7ff", borderDash: [6, 6], backgroundColor: "transparent", tension: 0.38 }
+          ]
+        },
+        options: baseChartOptions()
+      });
+
+      if (typeChart) typeChart.destroy();
+      typeChart = new Chart(document.getElementById("typeChart"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(typeMap),
+          datasets: [{ label: "Revenue", data: Object.values(typeMap), backgroundColor: "#0419F8", borderRadius: 12 }]
+        },
+        options: baseChartOptions()
+      });
+    }
+
+    function renderCrmCharts(filtered) {
+      const stageMap = {};
+      const sourceMap = {};
+
+      filtered.forEach(deal => {
+        stageMap[deal.stage] = (stageMap[deal.stage] || 0) + Number(deal.value || 0);
+        sourceMap[deal.source] = (sourceMap[deal.source] || 0) + 1;
+      });
+
+      if (pipelineChart) pipelineChart.destroy();
+      pipelineChart = new Chart(document.getElementById("pipelineChart"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(stageMap),
+          datasets: [{ label: "Deal Value", data: Object.values(stageMap), backgroundColor: "#0419F8", borderRadius: 12 }]
+        },
+        options: baseChartOptions()
+      });
+
+      if (sourceChart) sourceChart.destroy();
+      sourceChart = new Chart(document.getElementById("sourceChart"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(sourceMap),
+          datasets: [{ label: "Deals", data: Object.values(sourceMap), backgroundColor: ["#0419F8", "#2532AD", "#002492", "#0111A4", "#7ea0ff", "#051956", "#ffffff"] }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: "rgba(255,255,255,0.7)" } } }
+        }
+      });
+    }
+
+    function render() {
+      const filteredRevenue = getFilteredRecords();
+      const filteredCrm = getFilteredCrmDeals();
+      const boardDeals = getFilteredCrmDeals(true).filter(deal => crmFilterStage.value === "All" || deal.stage === crmFilterStage.value);
+
+      renderRevenueMetrics(filteredRevenue);
+      renderRevenueTable(filteredRevenue);
+      renderRevenueCharts(filteredRevenue);
+      renderCrmMetrics(filteredCrm);
+      renderPipelineBoard(boardDeals);
+      renderCrmTable(filteredCrm);
+      renderCrmCharts(filteredCrm);
+      save();
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const record = {
+        id: editingId || crypto.randomUUID(),
+        client: fields.client.value,
+        service: fields.service.value,
+        amount: Number(fields.amount.value),
+        status: fields.status.value,
+        type: fields.type.value,
+        date: fields.date.value
+      };
+
+      records = editingId ? records.map(item => item.id === editingId ? record : item) : [record, ...records];
+      editingId = null;
+      submitBtn.textContent = "Add Record";
+      cancelBtn.style.display = "none";
+      form.reset();
+      fields.date.value = new Date().toISOString().slice(0, 10);
+      fields.status.value = "Paid";
+      fields.type.value = "AI Agent";
+      render();
+    });
+
+    crmForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const deal = {
+        id: crmEditingId || crypto.randomUUID(),
+        company: crmFields.company.value,
+        contact: crmFields.contact.value,
+        email: crmFields.email.value,
+        phone: crmFields.phone.value,
+        stage: crmFields.stage.value,
+        value: Number(crmFields.value.value || 0),
+        probability: Number(crmFields.probability.value || 0),
+        lastFollowUp: crmFields.lastFollowUp.value,
+        nextFollowUp: crmFields.nextFollowUp.value,
+        source: crmFields.source.value,
+        service: crmFields.service.value,
+        notes: crmFields.notes.value
+      };
+
+      crmDeals = crmEditingId ? crmDeals.map(item => item.id === crmEditingId ? deal : item) : [deal, ...crmDeals];
+      crmEditingId = null;
+      crmSubmitBtn.textContent = "Add Deal";
+      crmCancelBtn.style.display = "none";
+      crmForm.reset();
+      crmFields.stage.value = "New";
+      crmFields.source.value = "Cold Call";
+      render();
+    });
+
+    window.editRecord = function(id) {
+      const record = records.find(item => item.id === id);
+      if (!record) return;
+      editingId = id;
+      fields.client.value = record.client;
+      fields.service.value = record.service;
+      fields.amount.value = record.amount;
+      fields.status.value = record.status;
+      fields.type.value = record.type;
+      fields.date.value = record.date;
+      submitBtn.textContent = "Save Changes";
+      cancelBtn.style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.deleteRecord = function(id) {
+      records = records.filter(item => item.id !== id);
+      render();
+    };
+
+    window.editCrmDeal = function(id) {
+      const deal = crmDeals.find(item => item.id === id);
+      if (!deal) return;
+
+      crmEditingId = id;
+      crmFields.company.value = deal.company;
+      crmFields.contact.value = deal.contact || "";
+      crmFields.email.value = deal.email || "";
+      crmFields.phone.value = deal.phone || "";
+      crmFields.stage.value = deal.stage;
+      crmFields.value.value = deal.value || "";
+      crmFields.probability.value = deal.probability || "";
+      crmFields.lastFollowUp.value = deal.lastFollowUp || "";
+      crmFields.nextFollowUp.value = deal.nextFollowUp || "";
+      crmFields.source.value = deal.source || "Other";
+      crmFields.service.value = deal.service || "";
+      crmFields.notes.value = deal.notes || "";
+      crmSubmitBtn.textContent = "Save Deal";
+      crmCancelBtn.style.display = "inline-block";
+      document.querySelector('[data-tab="crmView"]').click();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.markCrmWon = function(id) {
+      crmDeals = crmDeals.map(deal => deal.id === id ? { ...deal, stage: "Won", probability: 100 } : deal);
+      render();
+    };
+
+    window.deleteCrmDeal = function(id) {
+      crmDeals = crmDeals.filter(item => item.id !== id);
+      render();
+    };
+
+    cancelBtn.addEventListener("click", () => {
+      editingId = null;
+      submitBtn.textContent = "Add Record";
+      cancelBtn.style.display = "none";
+      form.reset();
+      fields.date.value = new Date().toISOString().slice(0, 10);
+      fields.status.value = "Paid";
+      fields.type.value = "AI Agent";
+    });
+
+    crmCancelBtn.addEventListener("click", () => {
+      crmEditingId = null;
+      crmSubmitBtn.textContent = "Add Deal";
+      crmCancelBtn.style.display = "none";
+      crmForm.reset();
+      crmFields.stage.value = "New";
+      crmFields.source.value = "Cold Call";
+    });
+
+    searchInput.addEventListener("input", render);
+    filterStatus.addEventListener("change", render);
+    crmSearchInput.addEventListener("input", render);
+    crmFilterStage.addEventListener("change", render);
+
+    targetInput.addEventListener("input", () => {
+      target = Number(targetInput.value);
+      render();
+    });
+
+    document.querySelectorAll(".tab").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+        document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
+        button.classList.add("active");
+        document.getElementById(button.dataset.tab).classList.add("active");
+        setTimeout(render, 50);
+      });
+    });
+
+    function downloadCsv(filename, headers, rows) {
+      const csvRows = rows.map(row => headers.map(header => `"${String(row[header] ?? "").replaceAll('"', '""')}"`).join(","));
+      const csv = [headers.join(","), ...csvRows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("exportRevenueBtn").addEventListener("click", () => {
+      downloadCsv("glad-ai-revenue-tracker.csv", ["client", "service", "amount", "status", "type", "date"], records);
+    });
+
+    document.getElementById("exportCrmBtn").addEventListener("click", () => {
+      downloadCsv(
+        "glad-ai-crm-pipeline.csv",
+        ["company", "contact", "email", "phone", "stage", "value", "probability", "lastFollowUp", "nextFollowUp", "source", "service", "notes"],
+        crmDeals
+      );
+    });
+
+    render();
+  </script>
+</body>
+</html>
